@@ -1,0 +1,16 @@
+{
+  "appName": "<Service Name>",
+  "debugMode": <true/false>,
+  "logOutput": "<file/os>",
+  "logPath": "./logs/parameterService.log",
+  "verboseApiResponse": <true/false>,
+  "server" : {
+    "port" : "<port number>"
+  },
+  "database" : {
+    "mongodb": {
+      "uri" : "<connection uri>",
+      "dbName": "<database name>"
+    }
+  }
+}
