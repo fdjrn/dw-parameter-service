@@ -77,19 +77,20 @@ return:
 */
 func (a *VoucherRepository) FindAll() (interface{}, int64, int64, error) {
 
-	var filter interface{}
+	filter := bson.D{}
 	switch a.Pagination.Status {
 	case entity.VoucherStatusActive:
 		filter = bson.D{{"deactivatedAt", bson.D{{"$eq", primitive.Null{}}}}}
 	case entity.VoucherStatusDeactivated:
 		filter = bson.D{{"deactivatedAt", bson.D{{"$ne", primitive.Null{}}}}}
 	default:
-		filter = bson.D{}
 	}
+
+	filter = append(filter, bson.D{{"partnerId", a.Pagination.PartnerID}}...)
 
 	skipValue := (a.Pagination.Page - 1) * a.Pagination.Size
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Second)
 	defer cancel()
 
 	cursor, err := db.Mongo.Collection.Voucher.Find(
@@ -132,6 +133,21 @@ func (a *VoucherRepository) FindByID(id interface{}) (interface{}, error) {
 	return result, nil
 }
 
+func (a *VoucherRepository) FindByVoucherID(id interface{}) (interface{}, error) {
+	result := new(entity.Voucher)
+
+	err := db.Mongo.Collection.Voucher.FindOne(
+		context.TODO(),
+		bson.D{{"voucherId", id}},
+	).Decode(&result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (a *VoucherRepository) FindByCode() (interface{}, error) {
 	result := new(entity.Voucher)
 
@@ -161,6 +177,7 @@ func (a *VoucherRepository) Update() error {
 			{"$set", bson.D{
 				{"description", a.Model.Description},
 				{"amount", a.Model.Amount},
+				{"price", a.Model.Price},
 				{"updatedAt", a.Model.UpdatedAt},
 			}},
 		})
@@ -400,7 +417,7 @@ return:
 //}
 //
 //func (a *VoucherRepository) DeactivateMerchant(u *entity.UnregisterAccount) (int, error) {
-//	//id, _ := primitive.ObjectIDFromHex(u.UniqueID)
+//	//id, _ := primitive.ObjectIDFromHex(u.VoucherID)
 //
 //	// filter condition
 //	filter := bson.D{{"merchantId", u.MerchantID}, {"partnerId", u.PartnerID}}
@@ -439,7 +456,7 @@ return:
 //}
 //
 //func (a *VoucherRepository) RemoveDeactivatedAccount(acc *entity.UnregisterAccount) (int, error) {
-//	filter := bson.D{{"uniqueId", acc.UniqueID}}
+//	filter := bson.D{{"uniqueId", acc.VoucherID}}
 //	result, err := db.Mongo.Collection.UnregisterAccount.DeleteOne(context.TODO(), filter)
 //
 //	if err != nil {

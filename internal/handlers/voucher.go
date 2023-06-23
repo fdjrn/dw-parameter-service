@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/dw-parameter-service/internal/db/entity"
 	"github.com/dw-parameter-service/internal/db/repository"
 	"github.com/dw-parameter-service/internal/handlers/validator"
+	"github.com/dw-parameter-service/internal/utilities"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"strings"
 	"time"
@@ -80,6 +81,8 @@ func (v *VoucherHandler) Create(c *fiber.Ctx) error {
 	}
 
 	tStamp := time.Now().UnixMilli()
+
+	v.Repository.Model.VoucherID = utilities.GenerateRandomString(5)
 	v.Repository.Model.CreatedAt = tStamp
 	v.Repository.Model.UpdatedAt = tStamp
 
@@ -215,6 +218,14 @@ func (v *VoucherHandler) GetAllVoucher(c *fiber.Ctx) error {
 		})
 	}
 
+	if payload.PartnerID == "" {
+		return c.Status(400).JSON(entity.Responses{
+			Success: false,
+			Message: "partnerId cannot be empty",
+			Data:    nil,
+		})
+	}
+
 	msgResponse := "vouchers successfully fetched"
 	payload.Status = strings.ToLower(payload.Status)
 
@@ -247,6 +258,14 @@ func (v *VoucherHandler) GetAllVoucher(c *fiber.Ctx) error {
 	v.Repository.Pagination = payload
 	vouchers, total, pages, err := v.Repository.FindAll()
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return c.Status(fiber.StatusRequestTimeout).JSON(entity.ResponsePaginated{
+				Success: false,
+				Message: "cannot fetch vouchers data, please try again later",
+				Data:    entity.ResponsePaginatedData{},
+			})
+		}
+
 		return c.Status(500).JSON(entity.ResponsePaginated{
 			Success: false,
 			Message: err.Error(),
@@ -269,9 +288,8 @@ func (v *VoucherHandler) GetAllVoucher(c *fiber.Ctx) error {
 }
 
 func (v *VoucherHandler) GetVoucherByID(c *fiber.Ctx) error {
-	id, _ := primitive.ObjectIDFromHex(c.Params("id"))
 
-	result, err := v.Repository.FindByID(id)
+	result, err := v.Repository.FindByVoucherID(c.Params("id"))
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return c.Status(400).JSON(entity.Responses{
