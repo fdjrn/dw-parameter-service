@@ -1,0 +1,15 @@
+[Unit]
+Description=Digital Wallet Parameter Service
+StartLimitIntervalSec=0
+Type=simple
+User=wallet
+After=network.target
+
+[Service]
+Restart=always
+RestartSec=3
+WorkingDirectory=/apps/digitalWallet/dw-parameter-service
+ExecStart=/apps/digitalWallet/dw-parameter-service/parameter-service
+
+[Install]
+WantedBy=multi-user.target
