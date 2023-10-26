@@ -1,0 +1,16 @@
+{
+  "appName": "ParameterService",
+  "debugMode": true,
+  "logOutput": "file",
+  "logPath": "./logs/parameterService.log",
+  "verboseApiResponse": true,
+  "server" : {
+    "port" : "9000"
+  },
+  "database" : {
+    "mongodb": {
+      "uri" : "mongodb+srv://poc:uJdZxAWbjcoqGNK2@cluster0.koc84.mongodb.net/?retryWrites=true&w=majority",
+      "dbName": "dev-mdw-parameter"
+    }
+  }
+}
