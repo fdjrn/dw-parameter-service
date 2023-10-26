@@ -4,6 +4,7 @@ import (
 	"github.com/dw-parameter-service/pkg/xlogger"
 	"github.com/spf13/viper"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -47,6 +48,16 @@ func Initialize() error {
 	if err != nil {
 		return err
 	}
+
+	// --- override config from os-env if its defined ---
+	if os.Getenv("DATABASE_MONGODB_URI") != "" {
+		MainConfig.Database.Mongo.Uri = os.Getenv("DATABASE_MONGODB_URI")
+	}
+
+	if os.Getenv("DATABASE_MONGODB_DB_NAME") != "" {
+		MainConfig.Database.Mongo.DBName = os.Getenv("DATABASE_MONGODB_DB_NAME")
+	}
+	// --- end config overrides ---
 
 	err = (&xlogger.AppLogger{
 		LogPath:     MainConfig.LogPath,
