@@ -27,11 +27,16 @@ Service ini berfungsi untuk meng-handle manajemen dan/atau konfigurasi parameter
     - PUT   | /api/v1/params/voucher/:id
 
 ### Build Docker Image
-    docker build -t dw-voucher-service:1.0.0 -f Dockerfile .
+    docker build -t dw-voucher:1.0.0 -f Dockerfile .
     
 ### Available Environment Value:
     - DATABASE_MONGODB_URI : conncetion uri to mongodb cluster
+        
+        example: mongodb+srv://<user>:<password>@<cluster-host>/?retryWrites=true&w=majority
+
     - DATABASE_MONGODB_DB_NAME : Database Name used for parameter service
 
+        example: dw-mdw-parameter
+
 ### Docker Run Command
-    docker run -p 9000:9000 --name dw-voucher-test --environment "DATABASE_MONGODB_DB_NAME=dev-mdw-parameter" dw-voucher-service:1.0.0
+    docker run -d -p 9000:9000 --name dw-voucher-service --env "DATABASE_MONGODB_DB_NAME=dev-mdw-parameter" --restart unless-stopped dw-voucher-service:1.0.0
