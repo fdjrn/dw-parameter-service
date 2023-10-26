@@ -39,4 +39,4 @@ Service ini berfungsi untuk meng-handle manajemen dan/atau konfigurasi parameter
         example: dw-mdw-parameter
 
 ### Docker Run Command
-    docker run -d -p 9000:9000 --name dw-voucher-service --env "DATABASE_MONGODB_DB_NAME=dev-mdw-parameter" --restart unless-stopped dw-voucher-service:1.0.0
+    docker run -d -p 9000:9000 --name dw-voucher-service --env "DATABASE_MONGODB_DB_NAME=dev-mdw-parameter" --restart unless-stopped dw-voucher:1.0.0
